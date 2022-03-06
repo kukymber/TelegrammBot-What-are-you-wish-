@@ -20,9 +20,11 @@ async def send_to_admin(dp):  # функция отпрвки сообщения
 async def command_start(message: Message):
     await bot.send_message(chat_id=message.from_user.id, text='Привет')  # вывод на команду start
     await bot.send_message(chat_id=message.from_user.id, text='О чем ты мечтаешь?')
-    echo(message)
+    # echo(message)
 
-def echo(message: Message):
+
+@dp.message_handler()
+async def echo(message: Message):
     key_for_picture = message.text  # ключ по которому будет производится поиск
     url = f'https://www.google.ru/search?q={key_for_picture}&newwindow=1&espv=2&source=lnms&tbm=isch&sa=X'
     response = requests.get(url)  # запрос по адресу
@@ -31,7 +33,7 @@ def echo(message: Message):
     for img in soup.findAll('img'):  # проход по результатам выборки по тегам
         images.append(img.get('src'))  # собирает словарь с сылками на картинки
     picture_for_agree = images[randint(1, 10)]
-    await bot.send_message(text=picture_for_agree)
+    await message.answer(text=picture_for_agree)
 
 
 @dp.message_handler()
