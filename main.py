@@ -8,8 +8,8 @@ bot = Bot(bot_token, parse_mode='HTML')  # передали в класс бот
 dp = Dispatcher(bot, storage=MemoryStorage())
 
 if __name__ == '__main__':
-    from handlers import dp, send_to_admin
-    executor.start_polling(dp, on_startup=send_to_admin, skip_updates=True)
+    from test import dp, send_to_admin
+    executor.start_polling(dp, on_startup=send_to_admin)
                                 # скип = пропускает сообщения, когда бот не рабоатет
 
 
