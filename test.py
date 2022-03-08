@@ -13,15 +13,15 @@ async def send_to_admin(dp):  # функция отпрвки сообщения
 
 
 class FSWaitAnswer(StatesGroup):
-    waiting_for_input = State()
+    what_you_need = State()
     waiting_for_agree = State()
 
 
-@dp.message_handler(commands=['start'])  # устанавливаем команды, после них вывод
-async def command_start(message: Message):
+@dp.message_handler(commands=['start'], state=None)  # устанавливаем команды, после них вывод
+async def command_start(message: Message, state: FSMContext):
     await message.answer(text='Привет')  # вывод на команду start
-    await bot.send_message(chat_id=message.from_user.id, text='О чем ты мечтаешь?')
-    await FSWaitAnswer.waiting_for_input.set()
+    await message.answer(text='О чем ты мечтаешь?')
+    await FSWaitAnswer.what_you_need.set()  # устанавливаем состояние
 
 
 async def echo(message: Message):
@@ -36,14 +36,17 @@ async def echo(message: Message):
     await message.answer(text=picture_for_agree)
 
 
-@dp.message_handler(state=FSWaitAnswer.waiting_for_input)
+@dp.message_handler(state=FSWaitAnswer.what_you_need)
 async def search_picture(message: Message, state: FSMContext):
-    waiting_for_input = message
+    async with state.proxy() as data:
+        data['what_you_need'] = message  # не точно(Записывает сообщение в what_you_need)
+    # await FSWaitAnswer.next()  # не точно ( то же самое что и через прокси)
+    waiting_for_input = data['what_you_need']  # !!!
     await echo(waiting_for_input)
     # await state.finish()
-    await FSWaitAnswer.next()
+    await FSWaitAnswer.next()  # если отключить, то всегда перехватывает сообщения
     await message.answer(text='Это то что ты хочешь?')
-    await FSWaitAnswer.waiting_for_agree.set()  # добавить иф на обработку двух вариантов
+    # await FSWaitAnswer.waiting_for_agree.set()  # добавить иф на обработку двух вариантов
 
 
 async def continuation_search(message: Message, state=FSMContext):
@@ -51,17 +54,22 @@ async def continuation_search(message: Message, state=FSMContext):
     await state.finish()
 
 
-async def again_search(message: Message, state=FSMContext):
-    waiting_for_input = message
-    await message.answer(text="попробую снова")
-    await echo(waiting_for_input)
+async def again_search(this_input_for_search):
+    input_some = this_input_for_search
+    await echo(input_some)
 
-@dp.message_handler()
-async def test(message: Message, state=FSMContext):
+
+@dp.message_handler(state=FSWaitAnswer.waiting_for_agree)
+async def test(message: Message, state: FSMContext):
     if message.text == 'То что нужно':
         await continuation_search(message, state=FSMContext)
     else:
-        await again_search(message, state=FSMContext)
+        # async with state.proxy() as data:
+        #     this_input_for_search = data['what_you_need']
+        await bot.send_message(chat_id=message.chat.id, text="попробую снова")
+        async with state.proxy() as data:
+            this_input_for_search = data['what_you_need']
+        await again_search(this_input_for_search)
 
 
 @dp.message_handler()

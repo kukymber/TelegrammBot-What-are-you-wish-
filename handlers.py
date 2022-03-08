@@ -13,7 +13,7 @@
 #
 #
 # class FSWaitAnswer(StatesGroup):
-#     waiting_for_input = State()
+#     what_you_need = State()
 #     waiting_for_agree = State()
 #
 #
@@ -21,13 +21,13 @@
 # async def command_start(message: Message):
 #     await message.answer(text='Привет')  # вывод на команду start
 #     await bot.send_message(chat_id=message.from_user.id, text='О чем ты мечтаешь?')
-#     await FSWaitAnswer.waiting_for_input.set()
+#     await FSWaitAnswer.what_you_need.set()
 #
 #
-# @dp.message_handler(state=FSWaitAnswer.waiting_for_input)
+# @dp.message_handler(state=FSWaitAnswer.what_you_need)
 # async def search_picture(message: Message, state: FSMContext):
-#     waiting_for_input = message
-#     await echo(waiting_for_input)
+#     what_you_need = message
+#     await echo(what_you_need)
 #     # await state.finish()
 #     await FSWaitAnswer.next()
 #     await message.answer(text='Это то что ты хочешь?')
