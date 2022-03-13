@@ -43,7 +43,7 @@ async def get_link_picture(message: Message):
 async def search_picture(message: Message, state: FSMContext):
     async with state.proxy() as data:
         data['what_you_need'] = message  # Записывает сообщение в what_you_need
-    waiting_for_input = data['what_you_need']  # экземпляр объекта what_you_need
+    waiting_for_input = data['what_you_need']  
     await get_link_picture(waiting_for_input)  # вызов функции передаем полученое сообщение
     await FSWaitAnswer.next()  # выбираем следущее состояние после того, которое в хандлере
     await message.answer(text='Это то что ты хочешь?')
